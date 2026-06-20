@@ -1,0 +1,53 @@
+version: "3.9"
+
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: zamfir-roman-netology-prometheus
+    restart: unless-stopped
+    depends_on:
+      - pushgateway
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    networks:
+      - zamfir-roman-my-netology-hw
+
+  pushgateway:
+    image: prom/pushgateway:latest
+    container_name: zamfir-roman-netology-pushgateway
+    restart: unless-stopped
+    ports:
+      - "9091:9091"
+    networks:
+      - zamfir-roman-my-netology-hw
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: zamfir-roman-netology-grafana
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+    ports:
+      - "80:3000"
+    environment:
+      GF_PATHS_CONFIG: /etc/grafana/custom.ini
+    volumes:
+      - ./custom.ini:/etc/grafana/custom.ini:ro
+      - grafana-data:/var/lib/grafana
+    networks:
+      - zamfir-roman-my-netology-hw
+
+volumes:
+  prometheus-data:
+  grafana-data:
+
+networks:
+  zamfir-roman-my-netology-hw:
+    name: zamfir-roman-my-netology-hw
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.5.0.0/16
